@@ -16,25 +16,27 @@ A lightweight fuzzy-search library for Kotlin, ported from the popular [Fuse.js]
 ### Gradle (Kotlin DSL)
 ```kotlin
 dependencies {
-    implementation("com.fusekt:fuse-kt:1.0.0")
+    implementation("io.github.yourusername:fuse-kt:1.0.0")
 }
 ```
 
 ### Gradle (Groovy)
 ```groovy
 dependencies {
-    implementation 'com.fusekt:fuse-kt:1.0.0'
+    implementation 'io.github.yourusername:fuse-kt:1.0.0'
 }
 ```
 
 ### Maven
 ```xml
 <dependency>
-    <groupId>com.fusekt</groupId>
+    <groupId>io.github.yourusername</groupId>
     <artifactId>fuse-kt</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
+
+**Note**: Replace `yourusername` with your actual GitHub username when publishing.
 
 ## Quick Start
 

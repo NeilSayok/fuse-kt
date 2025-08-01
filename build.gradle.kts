@@ -7,7 +7,7 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
-group = "com.fusekt"
+group = "io.github.neilsayok"  // Replace 'yourusername' with your GitHub username
 version = "1.0.0"
 
 repositories {
@@ -44,14 +44,14 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["java"])
             
-            groupId = "com.fusekt"
+            groupId = project.group.toString()
             artifactId = "fuse-kt"
             version = project.version.toString()
             
             pom {
                 name.set("Fuse-kt")
                 description.set("A lightweight fuzzy-search library for Kotlin, ported from Fuse.js")
-                url.set("https://github.com/yourusername/fuse-kt")
+                url.set("https://github.com/neilsayok/fuse-kt")
                 
                 licenses {
                     license {
@@ -62,16 +62,16 @@ publishing {
                 
                 developers {
                     developer {
-                        id.set("yourusername")
-                        name.set("Your Name")
-                        email.set("your.email@example.com")
+                        id.set("neilsayok")
+                        name.set("Sayok Dey Majumder")
+                        email.set("sayokdeymajumder1998@gmail.com")
                     }
                 }
                 
                 scm {
-                    connection.set("scm:git:git://github.com/yourusername/fuse-kt.git")
-                    developerConnection.set("scm:git:ssh://github.com:yourusername/fuse-kt.git")
-                    url.set("https://github.com/yourusername/fuse-kt")
+                    connection.set("scm:git:git://github.com/neilsayok/fuse-kt.git")
+                    developerConnection.set("scm:git:ssh://github.com:neilsayok/fuse-kt.git")
+                    url.set("https://github.com/neilsayok/fuse-kt")
                 }
             }
         }

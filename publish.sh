@@ -58,7 +58,7 @@ else
     echo "✅ Release published and promoted to Maven Central!"
     echo ""
     echo "The library should be available in Maven Central within 10-30 minutes:"
-    echo "https://search.maven.org/artifact/com.fusekt/fuse-kt/$VERSION/jar"
+    echo "https://search.maven.org/search?q=g:io.github.yourusername+AND+a:fuse-kt"
 fi
 
 echo ""
