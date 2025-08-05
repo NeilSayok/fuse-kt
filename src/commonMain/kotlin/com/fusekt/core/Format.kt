@@ -41,7 +41,7 @@ fun <T> computeScore(
         var totalScore = 1.0
 
         result.matches.forEach { match ->
-            // Try to get the actual weight from keyStore, fallback to 1.0
+            // Try to get the actual weight from keyStore using the key, fallback to 1.0  
             val weight = keyStore?.get(match.key ?: "")?.weight ?: 1.0
 
             totalScore *= (if (match.score == 0.0 && weight > 0) Double.MIN_VALUE else match.score).pow(

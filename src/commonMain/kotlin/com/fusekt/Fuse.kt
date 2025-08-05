@@ -180,12 +180,13 @@ class Fuse<T>(
             else -> throw UnsupportedOperationException("Logical search not yet implemented")
         }
 
-        computeScore<T>(results.toMutableList(), options.ignoreFieldNorm, _keyStore)
+        val mutableResults = results.toMutableList()
+        computeScore<T>(mutableResults, options.ignoreFieldNorm, _keyStore)
 
         val sortedResults = if (options.shouldSort) {
-            results.sortedWith { a, b -> options.sortFn(a, b) }
+            mutableResults.sortedWith { a, b -> options.sortFn(a, b) }
         } else {
-            results
+            mutableResults
         }
 
         val limitedResults = if (isNumber(limit) && limit > -1) {
