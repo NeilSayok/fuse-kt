@@ -4,13 +4,28 @@ import com.fusekt.core.FuseOptions
 import com.fusekt.helpers.*
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents a single record in the search index.
+ *
+ * @property v The indexed text value
+ * @property i The document index in the original collection
+ * @property n The normalized score for field length
+ * @property item Map of key indices to their extracted values
+ */
 data class IndexRecord(
     val v: String? = null,
     val i: Int,
     val n: Double? = null,
-    val `$`: Map<Int, Any>? = null
+    val item: Map<Int, Any>? = null
 )
 
+/**
+ * Represents a sub-record within an indexed field (for array values).
+ *
+ * @property v The text value
+ * @property i The index within the array
+ * @property n The normalized score
+ */
 @Serializable
 data class SubRecord(
     val v: String,
@@ -18,6 +33,16 @@ data class SubRecord(
     val n: Double
 )
 
+/**
+ * Pre-built search index for efficient fuzzy searching.
+ * 
+ * FuseIndex processes and stores document data in an optimized format
+ * for fast fuzzy search operations. It handles field extraction,
+ * normalization, and weight calculations.
+ *
+ * @param T The type of documents being indexed
+ * @param options Configuration options for indexing behavior
+ */
 class FuseIndex<T>(
     private val options: FuseOptions = FuseOptions()
 ) {
@@ -34,19 +59,39 @@ class FuseIndex<T>(
         private set
     private var _keysMap: Map<String, Int> = emptyMap()
 
+    /**
+     * Sets the source documents for this index.
+     *
+     * @param docs List of documents to index
+     */
     fun setSources(docs: List<T>) {
         this.docs = docs
     }
 
+    /**
+     * Sets the index records directly (used when loading from serialized data).
+     *
+     * @param records Pre-built index records
+     */
     fun setIndexRecords(records: MutableList<IndexRecord>) {
         this.records = records
     }
 
+    /**
+     * Sets the search keys for this index.
+     *
+     * @param keys List of FuseKey objects defining which fields to index
+     */
     fun setKeys(keys: List<FuseKey>) {
         this.keys = keys
         _keysMap = keys.mapIndexed { idx, key -> key.id to idx }.toMap()
     }
 
+    /**
+     * Builds the search index from the configured sources and keys.
+     * This method processes all documents and extracts searchable text
+     * according to the configured keys and options.
+     */
     fun create() {
         if (isCreated || docs.isEmpty()) {
             return
@@ -69,6 +114,11 @@ class FuseIndex<T>(
         norm.clear()
     }
 
+    /**
+     * Adds a new document to the existing index.
+     *
+     * @param doc The document to add and index
+     */
     fun add(doc: T) {
         val idx = size()
 
@@ -79,6 +129,11 @@ class FuseIndex<T>(
         }
     }
 
+    /**
+     * Removes a document from the index at the specified position.
+     *
+     * @param idx The index of the document to remove
+     */
     fun removeAt(idx: Int) {
         records.removeAt(idx)
 
@@ -175,12 +230,18 @@ class FuseIndex<T>(
 
         val record = IndexRecord(
             i = docIndex,
-            `$` = recordMap.toMap()
+            item = recordMap.toMap()
         )
 
         records.add(record)
     }
 
+    /**
+     * Serializes the index to a map that can be converted to JSON.
+     * Useful for saving and loading pre-built indices.
+     *
+     * @return Map containing the keys and records data
+     */
     fun toJSON(): Map<String, Any> {
         return mapOf(
             "keys" to keys,
@@ -189,6 +250,15 @@ class FuseIndex<T>(
     }
 }
 
+/**
+ * Creates a new search index from documents and key specifications.
+ *
+ * @param T The type of documents being indexed
+ * @param keys List of key specifications (strings, arrays, or weighted maps)
+ * @param docs List of documents to index
+ * @param options Configuration options for indexing
+ * @return A fully built FuseIndex ready for searching
+ */
 fun <T> createIndex(
     keys: List<Any>,
     docs: List<T>,
@@ -201,6 +271,14 @@ fun <T> createIndex(
     return myIndex
 }
 
+/**
+ * Recreates a FuseIndex from serialized data.
+ *
+ * @param T The type of documents being indexed
+ * @param data Map containing serialized index data (from toJSON())
+ * @param options Configuration options
+ * @return A FuseIndex reconstructed from the serialized data
+ */
 fun <T> parseIndex(
     data: Map<String, Any>,
     options: FuseOptions = FuseOptions()

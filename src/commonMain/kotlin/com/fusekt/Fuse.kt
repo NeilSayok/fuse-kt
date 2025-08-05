@@ -6,6 +6,38 @@ import com.fusekt.search.bitap.BitapSearch
 import com.fusekt.tools.*
 import com.fusekt.transform.FormattedResult
 
+/**
+ * Fuse is a lightweight fuzzy-search library for Kotlin Multiplatform.
+ * 
+ * It provides powerful and flexible fuzzy search capabilities with support for:
+ * - Weighted field searching
+ * - Customizable match thresholds
+ * - Match highlighting
+ * - Multiple search algorithms
+ * - Cross-platform compatibility (JVM, JS, Native)
+ *
+ * @param T The type of items being searched
+ * @param docs The list of documents/objects to search through
+ * @param options Configuration options for the search behavior
+ * @param index Optional pre-built index for faster repeated searches
+ *
+ * @sample
+ * ```kotlin
+ * data class Book(val title: String, val author: String)
+ * 
+ * val books = listOf(
+ *     Book("The Great Gatsby", "F. Scott Fitzgerald"),
+ *     Book("To Kill a Mockingbird", "Harper Lee")
+ * )
+ * 
+ * val options = FuseOptions.withWeightedKeys(
+ *     mapOf("title" to 0.8, "author" to 0.2)
+ * )
+ * 
+ * val fuse = Fuse<Book>(books, options)
+ * val results = fuse.search("gatsby")
+ * ```
+ */
 class Fuse<T>(
     docs: List<T>,
     options: FuseOptions = FuseOptions(),
@@ -17,14 +49,33 @@ class Fuse<T>(
     private var _myIndex: FuseIndex<T> = index ?: createIndex(options.keys, docs, options)
 
     companion object {
+        /** Current version of the Fuse library */
         const val version = "1.0.0"
         
+        /**
+         * Creates a search index for the given documents and keys.
+         * 
+         * Pre-building an index can significantly improve search performance
+         * when performing multiple searches on the same dataset.
+         *
+         * @param keys List of field names or weighted key configurations to index
+         * @param docs List of documents to index
+         * @param options Configuration options for indexing
+         * @return A FuseIndex that can be reused for multiple searches
+         */
         fun <T> createIndex(keys: List<Any>, docs: List<T>, options: FuseOptions = FuseOptions()): FuseIndex<T> {
             return com.fusekt.tools.createIndex(keys, docs, options)
         }
         
+        /**
+         * Parses a previously serialized index back into a FuseIndex object.
+         *
+         * @param data The serialized index data
+         * @param options Configuration options
+         * @return A FuseIndex reconstructed from the data
+         */
         fun <T> parseIndex(data: Map<String, Any>, options: FuseOptions = FuseOptions()): FuseIndex<T> {
-            return com.fusekt.tools.parseIndex(data, options)
+            return com.fusekt.tools.parseIndex<T>(data, options)
         }
     }
 
@@ -43,13 +94,18 @@ class Fuse<T>(
             throw IllegalArgumentException("Incorrect index type")
         }
 
-        _myIndex = index ?: createIndex(
+        _myIndex = index ?: com.fusekt.tools.createIndex(
             keys = options.keys,
             docs = _docs,
             options = options
         )
     }
 
+    /**
+     * Adds a new document to the search index.
+     *
+     * @param doc The document to add to the searchable collection
+     */
     fun add(doc: T) {
         if (!isDefined(doc)) {
             return
@@ -59,6 +115,12 @@ class Fuse<T>(
         _myIndex.add(doc)
     }
 
+    /**
+     * Removes documents from the search index based on a predicate function.
+     *
+     * @param predicate Function that returns true for documents that should be removed
+     * @return List of documents that were removed
+     */
     fun remove(predicate: (T, Int) -> Boolean = { _, _ -> false }): List<T> {
         val results = mutableListOf<T>()
 
@@ -76,13 +138,38 @@ class Fuse<T>(
         return results
     }
 
+    /**
+     * Removes a document at the specified index.
+     *
+     * @param idx The index of the document to remove
+     */
     fun removeAt(idx: Int) {
         _docs.removeAt(idx)
         _myIndex.removeAt(idx)
     }
 
+    /**
+     * Returns the current search index.
+     *
+     * @return The FuseIndex being used for searches
+     */
     fun getIndex(): FuseIndex<T> = _myIndex
 
+    /**
+     * Performs a fuzzy search on the indexed documents.
+     *
+     * @param query The search query string
+     * @param limit Maximum number of results to return (-1 for no limit)
+     * @return List of search results ordered by relevance
+     *
+     * @sample
+     * ```kotlin
+     * val results = fuse.search("great gatsby", limit = 5)
+     * results.forEach { result ->
+     *     println("Found: ${result.item} (score: ${result.score})")
+     * }
+     * ```
+     */
     fun search(query: Any, limit: Int = -1): List<FormattedResult<T>> {
         val results = when {
             isString(query) -> {
@@ -158,7 +245,7 @@ class Fuse<T>(
         val results = mutableListOf<FuseResult<T>>()
 
         records.forEach { record ->
-            val item = record.`$`
+            val item = record.item
             if (!isDefined(item)) {
                 return@forEach
             }

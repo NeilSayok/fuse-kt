@@ -1,7 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.2.0"
+    kotlin("multiplatform") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
-    application
     `maven-publish`
     signing
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
@@ -12,67 +11,88 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
-}
-
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    
-    testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
-}
-
-tasks.test {
-    useJUnitPlatform()
+    google()
 }
 
 kotlin {
     jvmToolchain(20)
-}
-
-application {
-    mainClass.set("com.fusekt.MainKt")
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
+    
+    jvm {
+        testRuns.named("test") {
+            executionTask.configure {
+                useJUnitPlatform()
+            }
+        }
+    }
+    
+    js(IR) {
+        browser()
+        nodejs()
+    }
+    
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    
+    macosX64()
+    macosArm64()
+    
+    linuxX64()
+    mingwX64()
+    
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+            }
+        }
+        
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+        
+        val jvmMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-stdlib")
+            }
+        }
+        
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.junit.jupiter:junit-jupiter:5.11.0")
+            }
+        }
+    }
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
+    publications.withType<MavenPublication> {
+        pom {
+            name.set("Fuse-kt")
+            description.set("A lightweight fuzzy-search library for Kotlin multiplatform, ported from Fuse.js")
+            url.set("https://github.com/neilsayok/fuse-kt")
             
-            groupId = project.group.toString()
-            artifactId = "fuse-kt"
-            version = project.version.toString()
+            licenses {
+                license {
+                    name.set("Apache License 2.0")
+                    url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                }
+            }
             
-            pom {
-                name.set("Fuse-kt")
-                description.set("A lightweight fuzzy-search library for Kotlin, ported from Fuse.js")
+            developers {
+                developer {
+                    id.set("neilsayok")
+                    name.set("Sayok Dey Majumder")
+                    email.set("sayokdeymajumder1998@gmail.com")
+                }
+            }
+            
+            scm {
+                connection.set("scm:git:git://github.com/neilsayok/fuse-kt.git")
+                developerConnection.set("scm:git:ssh://github.com:neilsayok/fuse-kt.git")
                 url.set("https://github.com/neilsayok/fuse-kt")
-                
-                licenses {
-                    license {
-                        name.set("Apache License 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                    }
-                }
-                
-                developers {
-                    developer {
-                        id.set("neilsayok")
-                        name.set("Sayok Dey Majumder")
-                        email.set("sayokdeymajumder1998@gmail.com")
-                    }
-                }
-                
-                scm {
-                    connection.set("scm:git:git://github.com/neilsayok/fuse-kt.git")
-                    developerConnection.set("scm:git:ssh://github.com:neilsayok/fuse-kt.git")
-                    url.set("https://github.com/neilsayok/fuse-kt")
-                }
             }
         }
     }
@@ -96,9 +116,10 @@ signing {
     val signingKey = findProperty("signingKey") as String? ?: System.getenv("SIGNING_KEY")
     val signingPassword = findProperty("signingPassword") as String? ?: System.getenv("SIGNING_PASSWORD")
     
-    if (signingKey != null && signingPassword != null) {
+    // Only sign when publishing to remote repository, not for local development
+    if (signingKey != null && signingPassword != null && !gradle.startParameter.taskNames.contains("publishToMavenLocal")) {
         useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications["maven"])
+        sign(publishing.publications)
     }
 }
 
