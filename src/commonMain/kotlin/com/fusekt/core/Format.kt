@@ -34,28 +34,27 @@ fun <T> format(
 
 fun <T> computeScore(
     results: MutableList<FuseResult<T>>,
-    ignoreFieldNorm: Boolean = false
+    ignoreFieldNorm: Boolean = false,
+    keyStore: com.fusekt.tools.KeyStore? = null
 ) {
-    results.forEach { result ->
+    results.forEachIndexed { index, result ->
         var totalScore = 1.0
 
         result.matches.forEach { match ->
-            val weight = match.key?.let { 1.0 } ?: 1.0 // Simplified weight handling
+            // Try to get the actual weight from keyStore, fallback to 1.0
+            val weight = keyStore?.get(match.key ?: "")?.weight ?: 1.0
 
             totalScore *= (if (match.score == 0.0 && weight > 0) Double.MIN_VALUE else match.score).pow(
                 weight * (if (ignoreFieldNorm) 1.0 else match.norm ?: 1.0)
             )
         }
 
-        // Create new result with updated score
-        val updatedResult = FuseResult<T>(
+        // Update the result in place
+        results[index] = FuseResult<T>(
             item = result.item,
             idx = result.idx,
             score = totalScore,
             matches = result.matches
         )
-        
-        // Update the result in place
-        results[results.indexOf(result)] = updatedResult
     }
 }

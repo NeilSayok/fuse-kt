@@ -49,9 +49,7 @@ class Fuse<T>(
     private var _myIndex: FuseIndex<T> = index ?: createIndex(options.keys, docs, options)
 
     companion object {
-        /** Current version of the Fuse library */
-        const val version = "1.0.0"
-        
+
         /**
          * Creates a search index for the given documents and keys.
          * 
@@ -182,7 +180,7 @@ class Fuse<T>(
             else -> throw UnsupportedOperationException("Logical search not yet implemented")
         }
 
-        computeScore<T>(results.toMutableList(), options.ignoreFieldNorm)
+        computeScore<T>(results.toMutableList(), options.ignoreFieldNorm, _keyStore)
 
         val sortedResults = if (options.shouldSort) {
             results.sortedWith { a, b -> options.sortFn(a, b) }
