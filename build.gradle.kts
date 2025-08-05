@@ -6,17 +6,17 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
-group = "io.github.neilsayok"  // Replace 'yourusername' with your GitHub username
+group = "io.github.neilsayok"
 version = "1.0.0"
 
 repositories {
     mavenCentral()
-    google()
 }
 
 kotlin {
-    jvmToolchain(20)
-    
+    jvmToolchain(21)
+
+    // JVM target
     jvm {
         testRuns.named("test") {
             executionTask.configure {
@@ -24,42 +24,49 @@ kotlin {
             }
         }
     }
-    
+
+    // JavaScript target
     js(IR) {
         browser()
         nodejs()
     }
-    
+
+    // Native targets
+    // iOS
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-    
+
+    // macOS
     macosX64()
     macosArm64()
-    
+
+    // Linux
     linuxX64()
+
+    // Windows
     mingwX64()
     
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
             }
         }
         
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(kotlin("test"))
             }
         }
         
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-stdlib")
             }
         }
         
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation("org.junit.jupiter:junit-jupiter:5.11.0")
             }
@@ -116,8 +123,7 @@ signing {
     val signingKey = findProperty("signingKey") as String? ?: System.getenv("SIGNING_KEY")
     val signingPassword = findProperty("signingPassword") as String? ?: System.getenv("SIGNING_PASSWORD")
     
-    // Only sign when publishing to remote repository, not for local development
-    if (signingKey != null && signingPassword != null && !gradle.startParameter.taskNames.contains("publishToMavenLocal")) {
+    if (signingKey != null && signingPassword != null) {
         useInMemoryPgpKeys(signingKey, signingPassword)
         sign(publishing.publications)
     }
