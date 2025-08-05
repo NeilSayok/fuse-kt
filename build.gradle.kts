@@ -30,6 +30,11 @@ kotlin {
         browser()
         nodejs()
     }
+    
+    // WebAssembly target
+    wasmJs {
+        browser()
+    }
 
     // Native targets
     // iOS

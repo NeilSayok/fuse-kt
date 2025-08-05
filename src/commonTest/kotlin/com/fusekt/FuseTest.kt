@@ -245,43 +245,47 @@ class FuseTest {
         // Define the data structure
 
 
-        // Create test data with random content
-        val testData: IndexResult = listOf(
-            IndexResultItem(
-                authorName = "John Smith",
-                authorUid = "user123",
-                body = "This is a comprehensive guide to machine learning algorithms and their applications in modern software development.",
-                tags = listOf("machine-learning", "ai", "algorithms", "programming"),
-                title = "Machine Learning Fundamentals",
-                url = "https://example.com/ml-guide"
-            ), IndexResultItem(
-                authorName = "Sarah Johnson",
-                authorUid = "user456",
-                body = "Exploring the latest trends in web development, including React, Vue, and Angular frameworks for building scalable applications.",
-                tags = listOf("web-development", "react", "vue", "angular", "javascript"),
-                title = "Modern Web Development Trends",
-                url = "https://example.com/web-trends"
-            ), IndexResultItem(
-                authorName = "Mike Davis",
-                authorUid = "user789",
-                body = "A deep dive into Kotlin programming language features, coroutines, and multiplatform development capabilities.",
-                tags = listOf("kotlin", "programming", "multiplatform", "coroutines"),
-                title = "Kotlin Programming Guide",
-                url = "https://example.com/kotlin-guide"
-            ), IndexResultItem(
-                authorName = "Emma Wilson",
-                authorUid = "user321",
-                body = "Database optimization techniques and best practices for improving query performance in large-scale applications.",
-                tags = listOf("database", "optimization", "performance", "sql"),
-                title = "Database Performance Optimization",
-                url = "https://example.com/db-optimization"
-            ), IndexResultItem(
-                authorName = "Alex Chen",
-                authorUid = "user654",
-                body = "Understanding cloud computing architectures and serverless technologies for building resilient distributed systems.",
-                tags = listOf("cloud", "serverless", "architecture", "distributed-systems"),
-                title = "Cloud Computing Architecture",
-                url = "https://example.com/cloud-architecture"
+        // Create test data as Maps instead of data classes
+        val testData: List<Map<String, Any?>> = listOf(
+            mapOf(
+                "author_name" to "John Smith",
+                "author_uid" to "user123",
+                "body" to "This is a comprehensive guide to machine learning algorithms and their applications in modern software development.",
+                "tags" to listOf("machine-learning", "ai", "algorithms", "programming"),
+                "title" to "Machine Learning Fundamentals",
+                "url" to "https://example.com/ml-guide"
+            ),
+            mapOf(
+                "author_name" to "Sarah Johnson",
+                "author_uid" to "user456",
+                "body" to "Exploring the latest trends in web development, including React, Vue, and Angular frameworks for building scalable applications.",
+                "tags" to listOf("web-development", "react", "vue", "angular", "javascript"),
+                "title" to "Modern Web Development Trends",
+                "url" to "https://example.com/web-trends"
+            ),
+            mapOf(
+                "author_name" to "Mike Davis",
+                "author_uid" to "user789",
+                "body" to "A deep dive into Kotlin programming language features, coroutines, and multiplatform development capabilities.",
+                "tags" to listOf("kotlin", "programming", "multiplatform", "coroutines"),
+                "title" to "Kotlin Programming Guide",
+                "url" to "https://example.com/kotlin-guide"
+            ),
+            mapOf(
+                "author_name" to "Emma Wilson",
+                "author_uid" to "user321",
+                "body" to "Database optimization techniques and best practices for improving query performance in large-scale applications.",
+                "tags" to listOf("database", "optimization", "performance", "sql"),
+                "title" to "Database Performance Optimization",
+                "url" to "https://example.com/db-optimization"
+            ),
+            mapOf(
+                "author_name" to "Alex Chen",
+                "author_uid" to "user654",
+                "body" to "Understanding cloud computing architectures and serverless technologies for building resilient distributed systems.",
+                "tags" to listOf("cloud", "serverless", "architecture", "distributed-systems"),
+                "title" to "Cloud Computing Architecture",
+                "url" to "https://example.com/cloud-architecture"
             )
         )
 
@@ -298,7 +302,7 @@ class FuseTest {
             includeScore = true,
         )
 
-        val fuse = Fuse<IndexResultItem>(testData, options)
+        val fuse = Fuse(testData, options)
 
         // Test search for "kotlin"
         val kotlinResults = fuse.search("kotlin")
@@ -306,7 +310,7 @@ class FuseTest {
 
         // The Kotlin Programming Guide should be highly ranked due to tags weight
         val firstResult = kotlinResults.first()
-        assertEquals("Kotlin Programming Guide", firstResult.item.title)
+        assertEquals("Kotlin Programming Guide", firstResult.item["title"])
         assertTrue(firstResult.score != null, "Score should be included")
 
         // Test search for "web development"
@@ -314,15 +318,15 @@ class FuseTest {
         assertTrue(webResults.isNotEmpty(), "Should find results for 'web development'")
 
         // Should find the web development article
-        val webMatch = webResults.find { it.item.title?.contains("Web Development") == true }
+        val webMatch = webResults.find { (it.item["title"] as? String)?.contains("Web Development") == true }
         assertTrue(webMatch != null, "Should find web development article")
 
         // Test search for "machine learning"
         val mlResults = fuse.search("machine learning")
         assertTrue(mlResults.isNotEmpty(), "Should find results for 'machine learning'")
 
-        // Machine learning article should be found due to high tags weight
-        val mlMatch = mlResults.find { it.item.tags?.contains("machine-learning") == true }
+        // Machine learning article should be found due to high tags weight  
+        val mlMatch = mlResults.find { (it.item["tags"] as? List<*>)?.contains("machine-learning") == true }
         assertTrue(mlMatch != null, "Should find machine learning article via tags")
 
         // Test search for author name (low weight should still work but with lower ranking)
