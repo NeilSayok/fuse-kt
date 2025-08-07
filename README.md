@@ -18,6 +18,7 @@ A lightweight fuzzy-search library for Kotlin, ported from the popular [Fuse.js]
 dependencies {
     implementation("io.github.yourusername:fuse-kt:1.0.0")
 }
+
 ```
 
 ### Gradle (Groovy)
