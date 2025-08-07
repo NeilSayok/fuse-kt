@@ -2,7 +2,7 @@ plugins {
     kotlin("multiplatform") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
     `maven-publish`
-    signing
+//    signing
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
@@ -124,15 +124,15 @@ publishing {
     }
 }
 
-signing {
-    val signingKey = findProperty("signingKey") as String? ?: System.getenv("SIGNING_KEY")
-    val signingPassword = findProperty("signingPassword") as String? ?: System.getenv("SIGNING_PASSWORD")
-    
-    if (signingKey != null && signingPassword != null) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications)
-    }
-}
+//signing {
+//    val signingKey = findProperty("signingKey") as String? ?: System.getenv("SIGNING_KEY")
+//    val signingPassword = findProperty("signingPassword") as String? ?: System.getenv("SIGNING_PASSWORD")
+//
+//    if (signingKey != null && signingPassword != null) {
+//        useInMemoryPgpKeys(signingKey, signingPassword)
+//        sign(publishing.publications)
+//    }
+//}
 
 nexusPublishing {
     repositories {
