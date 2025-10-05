@@ -46,3 +46,10 @@ bin/
 /Fuse/
 Fuse/
 bundle
+/.idea
+/.idea/artifacts/fuse_kt_jvm_1_0_0.xml
+/.idea/artifacts/fuse_kt_wasm_js_1_0_0.xml
+/.idea/git_toolbox_prj.xml
+/.idea/gradle.xml
+/.idea/kotlinc.xml
+/.idea/misc.xml
