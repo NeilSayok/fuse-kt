@@ -1,43 +1,95 @@
 # Fuse-kt
 
-A lightweight fuzzy-search library for Kotlin, ported from the popular [Fuse.js](https://fusejs.io) JavaScript library.
+A lightweight fuzzy-search library for Kotlin Multiplatform, ported from the popular [Fuse.js](https://fusejs.io) JavaScript library.
 
 ## Features
 
-- **Lightweight and fast**: Zero external dependencies (except Kotlin stdlib)
+- **Kotlin Multiplatform**: Supports JVM, JS, WasmJs, iOS, macOS, Linux, and Windows
+- **Lightweight and fast**: Minimal dependencies (only kotlinx-serialization-json)
 - **Fuzzy searching**: Uses the Bitap algorithm for approximate string matching
 - **Flexible configuration**: Customizable search options (threshold, location, distance, etc.)
 - **Multiple search types**: Search within string lists or object properties
 - **Match highlighting**: Get indices of matched characters for highlighting
 - **Type-safe**: Written in Kotlin with full type safety
 
+## Supported Platforms
+
+- **JVM** (Java 21+)
+- **JavaScript** (Browser & Node.js)
+- **WebAssembly** (WasmJs)
+- **iOS** (x64, ARM64, Simulator ARM64)
+- **macOS** (x64, ARM64)
+- **Linux** (x64)
+- **Windows** (MinGW x64)
+
+## Getting Started
+
+Here's a quick overview of how to start using Fuse-kt:
+
+1. **Add GitHub Packages repository** to your build configuration
+2. **Configure GitHub credentials** with a Personal Access Token
+3. **Add the dependency** to your project
+4. **Start fuzzy searching** in your code
+
+Detailed steps are provided in the sections below.
+
 ## Installation
 
-### Gradle (Kotlin DSL)
+### Step 1: Add GitHub Packages Repository
+
+Add the GitHub Packages repository to your `settings.gradle.kts` or `build.gradle.kts`:
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/NeilSayok/fuse-kt")
+        credentials {
+            username = providers.gradleProperty("gpr.user").orElse(providers.environmentVariable("GITHUB_ACTOR")).get()
+            password = providers.gradleProperty("gpr.key").orElse(providers.environmentVariable("GITHUB_TOKEN")).get()
+        }
+    }
+}
+```
+
+### Step 2: Configure GitHub Credentials
+
+Add your GitHub credentials to `~/.gradle/gradle.properties` or `local.properties` in your project root:
+
+```properties
+gpr.user=your_github_username
+gpr.key=your_github_personal_access_token
+```
+
+**Note**: You need a GitHub Personal Access Token with `read:packages` permission. Create one at [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens).
+
+### Step 3: Add Dependency
+
+#### Gradle (Kotlin DSL)
 ```kotlin
 dependencies {
-    implementation("io.github.yourusername:fuse-kt:1.0.0")
+    implementation("io.github.neilsayok:fuse-kt:1.0.4")
 }
-
 ```
 
-### Gradle (Groovy)
+#### Gradle (Groovy)
 ```groovy
 dependencies {
-    implementation 'io.github.yourusername:fuse-kt:1.0.0'
+    implementation 'io.github.neilsayok:fuse-kt:1.0.4'
 }
 ```
 
-### Maven
+#### Maven
 ```xml
 <dependency>
-    <groupId>io.github.yourusername</groupId>
-    <artifactId>fuse-kt</artifactId>
-    <version>1.0.0</version>
+    <groupId>io.github.neilsayok</groupId>
+    <artifactId>fuse-kt-jvm</artifactId>
+    <version>1.0.4</version>
 </dependency>
 ```
 
-**Note**: Replace `yourusername` with your actual GitHub username when publishing.
+**Note**: For Maven, you also need to configure the GitHub Packages repository in your `pom.xml`.
 
 ## Quick Start
 
@@ -56,6 +108,24 @@ results.forEach { result ->
 // apple (score: 0.0)
 // pineapple (score: 0.25)
 ```
+
+### Kotlin Multiplatform Usage
+
+For multiplatform projects, add the dependency in your `commonMain` source set:
+
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation("io.github.neilsayok:fuse-kt:1.0.4")
+            }
+        }
+    }
+}
+```
+
+The same API works across all platforms without any platform-specific code.
 
 ### Object Search
 ```kotlin
@@ -135,63 +205,7 @@ Fuse(docs: List<Any>, options: FuseOptions = FuseOptions(), index: FuseIndex? = 
 - `Fuse.createIndex(keys: List<Any>, docs: List<Any>, options: FuseOptions): FuseIndex`
 - `Fuse.parseIndex(data: Map<String, Any>, options: FuseOptions): FuseIndex`
 
-## Publishing to Maven Central
 
-This project is configured for publishing to Maven Central. To publish:
-
-### Prerequisites
-
-1. **Sonatype OSSRH Account**: Create an account at [issues.sonatype.org](https://issues.sonatype.org)
-2. **GPG Key Pair**: Generate a GPG key pair for signing artifacts
-3. **GitHub Repository**: Host your code on GitHub (or update URLs in build.gradle.kts)
-
-### Setup
-
-1. **Configure credentials** in your `~/.gradle/gradle.properties`:
-```properties
-# Sonatype OSSRH credentials
-ossrhUsername=your_sonatype_username
-ossrhPassword=your_sonatype_password
-
-# PGP signing
-signingKey=your_base64_encoded_private_key
-signingPassword=your_private_key_password
-```
-
-2. **Update project metadata** in `build.gradle.kts`:
-   - Replace `yourusername` with your GitHub username
-   - Update developer information
-   - Update URLs to point to your repository
-
-3. **Export your GPG private key as base64**:
-```bash
-gpg --export-secret-keys --armor KEY_ID | base64 | pbcopy
-```
-
-### Publishing Commands
-
-```bash
-# Build and test
-./gradlew clean build test
-
-# Publish to staging repository
-./gradlew publishToSonatype
-
-# Close and release staging repository (promotes to Maven Central)
-./gradlew closeAndReleaseSonatypeStagingRepository
-```
-
-Or publish locally for testing:
-```bash
-./gradlew publishToMavenLocal
-```
-
-### Version Management
-
-- Release versions: `1.0.0`, `1.1.0`, etc.
-- Snapshot versions: `1.0.0-SNAPSHOT`, `1.1.0-SNAPSHOT`, etc.
-
-Snapshots are automatically published to the snapshots repository, while release versions go through staging.
 
 ## License
 
